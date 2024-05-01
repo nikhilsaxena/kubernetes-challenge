@@ -1,0 +1,49 @@
+#...Deployment YAML file
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-challenge
+spec:
+  selector:
+    matchLabels:
+      name: k8s-pods
+  template:
+    metadata:
+      labels:
+        name: k8s-pods
+    spec:
+      containers:
+        - image: k8s-challenge:latest
+          name: k8s-pod
+          env:
+            - name: NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: k8s-challenge-configmap
+                  key: guest-name
+          ports:
+            - containerPort: 4000
+          imagePullPolicy: Never
+
+---
+#...Service YAML file
+apiVersion: v1
+kind: Service
+metadata:
+  name: entrypoint
+spec:
+  type: NodePort
+  selector:
+    name: k8s-pods
+  ports:
+    - port: 8080
+      targetPort: 4000
+
+---
+#...ConfigMap YAML file
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: k8s-challenge-configmap
+data:
+  guest-name: Nikhil
